@@ -2,7 +2,9 @@ package br.com.instagram.service;
 
 import br.com.instagram.config.Hash;
 import br.com.instagram.dto.LoginDto;
+import br.com.instagram.integration.QueryExecutor;
 import br.com.instagram.integration.QueryIntegration;
+import br.com.instagram.integration.dto.NextHashtagDto;
 import br.com.instagram.integration.pagination.Variable;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
@@ -17,17 +19,22 @@ public class HashtagService {
     private final QueryIntegration queryIntegration;
     private final AuthService authService;
 
-    public Object getPostsByHashtag(String tagName, String after) {
+    public NextHashtagDto getPostsByHashtag(String tagName, String after) {
         Set<Cookie> cookies = getDylan();
         return queryIntegration.executeQuery(
-                cookies,
-                Variable.builder()
-                        .tagName(tagName)
-                        .after(after)
-                        .build(),
-                new TypeReference<>() {
-                },
-                Hash.HASHTAG
+                QueryExecutor.<NextHashtagDto>builder()
+                        .cookies(cookies)
+                        .variable(Variable.builder()
+                                .tagName(tagName)
+                                .after(after)
+                                .first(10)
+                                .build())
+                        .typeReference(new TypeReference<>() {
+                        })
+                        .hash(Hash.HASHTAG)
+                        .queryVariables(Set.of("tagName=" + tagName))
+                        .entryPoint("hashtag")
+                        .build()
         );
     }
 

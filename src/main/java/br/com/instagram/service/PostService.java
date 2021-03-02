@@ -3,6 +3,7 @@ package br.com.instagram.service;
 import br.com.instagram.config.Hash;
 import br.com.instagram.dto.LoginDto;
 import br.com.instagram.integration.PostIntegration;
+import br.com.instagram.integration.QueryExecutor;
 import br.com.instagram.integration.QueryIntegration;
 import br.com.instagram.integration.dto.NextPostDto;
 import br.com.instagram.integration.dto.PostDto;
@@ -24,20 +25,31 @@ public class PostService {
     public NextPostDto getPosts(String id, String after) {
         Set<Cookie> cookies = getDylan();
         return queryIntegration.executeQuery(
-                cookies,
-                Variable.builder()
-                        .id(id)
-                        .after(after)
-                        .build(),
-                new TypeReference<>() {
-                },
-                Hash.POST
+                QueryExecutor.<NextPostDto>builder()
+                        .cookies(cookies)
+                        .variable(Variable.builder()
+                                .id(id)
+                                .after(after)
+                                .build())
+                        .typeReference(new TypeReference<>() {
+                        })
+                        .hash(Hash.POST)
+                        .queryVariables(Set.of("id=" + id))
+                        .entryPoint("post")
+                        .build()
         );
     }
 
     public PostDto getPost(String shortcode) {
         Set<Cookie> cookies = getDylan();
-        return postIntegration.getPost(cookies, shortcode);
+        return postIntegration.getPost(cookies, shortcode, executorFactory(shortcode));
+    }
+
+    private QueryExecutor<PostDto> executorFactory(String shortcode) {
+        return QueryExecutor.<PostDto>builder()
+                .queryVariables(Set.of("shortcode=" + shortcode))
+                .entryPoint("comment")
+                .build();
     }
 
     private Set<Cookie> getDylan() {

@@ -24,12 +24,11 @@ public class ProfileIntegration {
     private final RestTemplate restTemplate;
 
     public UserDto profileInfo(Set<Cookie> cookies, String username) {
-        HttpHeaders httpHeaders = HttpHeadersUtil.headersWithCookies(cookies);
         ResponseEntity<ProfileDto> exchange = restTemplate.exchange(
                 "https://www.instagram.com/{username}/?__a=1",
                 HttpMethod.GET,
-                new HttpEntity<>(httpHeaders),
-                ParameterizedTypeReference.forType(new TypeReference<ProfileDto>(){}.getType()),
+                new HttpEntity<>(HttpHeadersUtil.headersWithCookies(cookies)),
+                ProfileDto.class,
                 username
         );
         return requireNonNull(exchange.getBody()).getGraphql().getUser();

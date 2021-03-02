@@ -13,7 +13,8 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public ResponseEntity<?> getPosts(@RequestParam String id, @RequestParam String after) {
+    public ResponseEntity<?> getPosts(@RequestParam String id,
+                                      @RequestParam String after) {
         return new ResponseEntity<>(postService.getPosts(id, after), HttpStatus.OK);
     }
 

@@ -16,8 +16,8 @@ public class HashtagController {
     private final HashtagService hashTagService;
 
     @GetMapping
-    public ResponseEntity<?> getComments(@RequestParam String tagName,
-                                         @RequestParam(required = false) String after) {
+    public ResponseEntity<?> getPostsByHashtag(@RequestParam String tagName,
+                                               @RequestParam(required = false) String after) {
         return new ResponseEntity<>(hashTagService.getPostsByHashtag(tagName, after), HttpStatus.OK);
     }
 }

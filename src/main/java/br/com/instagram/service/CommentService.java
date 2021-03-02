@@ -2,6 +2,7 @@ package br.com.instagram.service;
 
 import br.com.instagram.config.Hash;
 import br.com.instagram.dto.LoginDto;
+import br.com.instagram.integration.QueryExecutor;
 import br.com.instagram.integration.QueryIntegration;
 import br.com.instagram.integration.dto.NextCommentDto;
 import br.com.instagram.integration.pagination.Variable;
@@ -21,14 +22,18 @@ public class CommentService {
     public NextCommentDto getComments(String shortcode, String after) {
         Set<Cookie> cookies = getDylan();
         return queryIntegration.executeQuery(
-                cookies,
-                Variable.builder()
-                        .shortcode(shortcode)
-                        .after(after)
-                        .build(),
-                new TypeReference<>() {
-                },
-                Hash.COMMENT
+                QueryExecutor.<NextCommentDto>builder()
+                        .cookies(cookies)
+                        .variable(Variable.builder()
+                                .shortcode(shortcode)
+                                .after(after)
+                                .build())
+                        .typeReference(new TypeReference<>() {
+                        })
+                        .hash(Hash.COMMENT)
+                        .queryVariables(Set.of("shortcode=" + shortcode))
+                        .entryPoint("comment")
+                        .build()
         );
     }
 

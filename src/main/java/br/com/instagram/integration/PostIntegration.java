@@ -1,6 +1,6 @@
 package br.com.instagram.integration;
 
-import br.com.instagram.config.VariableComponent;
+import br.com.instagram.config.QueryComponent;
 import br.com.instagram.integration.dto.PostDto;
 import br.com.instagram.integration.pagination.Variable;
 import br.com.instagram.util.WebDriverBridge;
@@ -15,12 +15,12 @@ import java.util.Set;
 @Component
 @RequiredArgsConstructor
 public class PostIntegration {
-    private final VariableComponent variableComponent;
+    private final QueryComponent queryComponent;
     private final ObjectMapper objectMapper;
     private final WebDriver chromeDriver;
 
-    public PostDto getPost(Set<Cookie> cookies, String shortcode) {
-        variableComponent.setVariable(Variable.builder().shortcode(shortcode).build());
+    public <T> PostDto getPost(Set<Cookie> cookies, String shortcode, QueryExecutor<T> queryExecutor) {
+        queryComponent.setQueryExecutor(queryExecutor);
         WebDriverBridge webDriverBridge = new WebDriverBridge(chromeDriver);
         webDriverBridge.get("https://www.instagram.com");
         cookies.forEach(it -> webDriverBridge.manage().addCookie(it));

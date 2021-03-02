@@ -1,6 +1,5 @@
 package br.com.instagram.integration.dto;
 
-import br.com.instagram.config.ConfigProperties;
 import br.com.instagram.integration.pagination.NextPageHandler;
 import br.com.instagram.integration.pagination.PageInfo;
 import br.com.instagram.integration.pagination.Pagination;
@@ -54,11 +53,6 @@ public class PostDto implements NextPageHandler {
 
     @JsonAlias("edge_media_to_parent_comment")
     Pagination<NodeDto<CommentDto>> parentComment;
-
-    @Override
-    public String next(PageInfo pageInfo) {
-        return String.format("%s/post?id=%s&after=%s", ConfigProperties.getApiBasePath(), owner.getId(), pageInfo.getEndCursor());
-    }
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class Builder {

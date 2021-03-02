@@ -60,11 +60,6 @@ public class UserDto implements NextPageHandler {
     @JsonAlias("edge_owner_to_timeline_media")
     Pagination<NodeDto<PostDto>> timeLineMedia;
 
-    @Override
-    public String next(PageInfo pageInfo) {
-        return null;
-    }
-
     @JsonPOJOBuilder(withPrefix = "")
     public static class Builder {
     }
