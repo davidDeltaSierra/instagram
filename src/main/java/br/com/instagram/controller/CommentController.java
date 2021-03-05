@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("comment")
 @RequiredArgsConstructor
-public class CommentController {
+public class CommentController extends AbstractController {
     private final CommentService commentService;
 
     @GetMapping
     public ResponseEntity<?> getComments(@RequestParam String shortcode,
                                          @RequestParam String after) {
-        return new ResponseEntity<>(commentService.getComments(shortcode, after), HttpStatus.OK);
+        return new ResponseEntity<>(commentService.getComments(shortcode, after, getSessionRedis()), HttpStatus.OK);
     }
 }

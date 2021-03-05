@@ -4,6 +4,9 @@ import br.com.instagram.config.ConfigProperties;
 import br.com.instagram.config.QueryComponent;
 import br.com.instagram.integration.QueryExecutor;
 
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import static java.util.Objects.isNull;
 
 public interface NextPageHandler {
@@ -14,7 +17,12 @@ public interface NextPageHandler {
             return null;
         }
         String url = ConfigProperties.getApiBasePath() + "/" + queryExecutorFromRequest.getEntryPoint() + "?after=" + pageInfo.getEndCursor() + "&";
-        String query = String.join("&", queryExecutorFromRequest.getQueryVariables());
+        String query = queryExecutorFromRequest
+                .getQueryVariables()
+                .entrySet()
+                .stream()
+                .map(Objects::toString)
+                .collect(Collectors.joining("&"));
         return url.concat(query);
     }
 

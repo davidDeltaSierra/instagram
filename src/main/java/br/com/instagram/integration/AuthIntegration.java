@@ -1,53 +1,56 @@
 package br.com.instagram.integration;
 
 import br.com.instagram.dto.LoginDto;
-import br.com.instagram.util.WebDriverBridge;
+import br.com.instagram.integration.dto.LoginPage;
+import br.com.instagram.util.RegexUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.jsoup.Connection;
+import org.jsoup.HttpStatusException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
+import java.util.Map;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuthIntegration {
-    private final WebDriver chromeDriver;
+    private final ObjectMapper objectMapper;
 
-    public Set<Cookie> auth(LoginDto loginDto) {
-        WebDriverBridge webDriverBridge = new WebDriverBridge(chromeDriver);
-        webDriverBridge.get("https://www.instagram.com");
-        WebElement loginForm = webDriverBridge
-                .awaitElementOrThrowNoSuchElement(By.id("loginForm"), 2, TimeUnit.SECONDS, 5);
-        WebElement username = loginForm.findElement(By.name("username"));
-        WebElement password = loginForm.findElement(By.name("password"));
-        WebElement loginButton = loginForm
-                .findElements(By.tagName("button"))
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Login button not found"));
-
-        username.sendKeys(loginDto.getUsername());
-        password.sendKeys(loginDto.getPassword());
-        loginButton.click();
-        Optional<WebElement> slfErrorAlert = webDriverBridge.awaitElementOptional(
-                By.id("slfErrorAlert"),
-                1,
-                TimeUnit.SECONDS,
-                10,
-                () -> !WebDriverBridge.isDisplayedSuppressStaleElementReferenceException(loginForm)
-        );
-        if (slfErrorAlert.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, slfErrorAlert.get().getText());
+    public Map<String, String> auth(LoginDto loginDto, String userAgent) {
+        try {
+            Document document = Jsoup.connect("https://www.instagram.com/accounts/login/").get();
+            String sharedData = RegexUtil.getSharedData(document.data())
+                    .orElseThrow(() -> new RuntimeException("Shared data not found in page"));
+            LoginPage loginPage = objectMapper.readValue(sharedData, LoginPage.class);
+            Connection.Response response = Jsoup.connect("https://www.instagram.com/accounts/login/ajax/")
+                    .ignoreContentType(true)
+                    .method(Connection.Method.POST)
+                    .header("User-Agent", userAgent)
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .header("x-csrftoken", loginPage.getConfig().getCsrfToken())
+                    .data("username", loginDto.getUsername())
+                    .data("enc_password", "#PWD_INSTAGRAM_BROWSER:0:" + System.currentTimeMillis() + ":" + loginDto.getPassword())
+                    .execute();
+            Map<String, String> cookies = response.cookies();
+            if (!cookies.containsKey("sessionid")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
+            }
+            return cookies;
+        } catch (HttpStatusException ex) {
+            HttpStatus resolve = ofNullable(HttpStatus.resolve(ex.getStatusCode()))
+                    .orElse(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ResponseStatusException(resolve, ex.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return webDriverBridge.manage().getCookies();
     }
 }

@@ -5,17 +5,16 @@ import br.com.instagram.integration.pagination.Variable;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Builder;
 import lombok.Value;
-import org.openqa.selenium.Cookie;
 
-import java.util.Set;
+import java.util.Map;
 
 @Value
 @Builder(builderClassName = "Builder")
 public class QueryExecutor<T> {
-    Set<Cookie> cookies;
+    Map<String, String> cookies;
     Variable variable;
     TypeReference<T> typeReference;
     Hash hash;
-    Set<String> queryVariables;
+    Map<String, String> queryVariables;
     String entryPoint;
 }

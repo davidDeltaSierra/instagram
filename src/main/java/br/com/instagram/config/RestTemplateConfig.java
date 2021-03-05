@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -22,20 +24,25 @@ public class RestTemplateConfig implements WebMvcConfigurer {
 
     @Bean
     public RestTemplate restTemplate() {
-        RestTemplate restTemplate = new RestTemplate(getMessageConverters());
-        restTemplate.setInterceptors(List.of(
-                (httpRequest, bytes, clientHttpRequestExecution) -> {
-                    log.info("Rest Template send new request to: {}", httpRequest.getURI());
-                    return clientHttpRequestExecution.execute(httpRequest, bytes);
-                }
-        ));
-        return restTemplate;
+        return new RestTemplate(getMessageConverters());
     }
 
     private List<HttpMessageConverter<?>> getMessageConverters() {
         return List.of(
                 new StringHttpMessageConverter(StandardCharsets.UTF_8),
-                new MappingJackson2HttpMessageConverter(objectMapper)
+                mappingJackson2HttpMessageConverter(),
+                new ByteArrayHttpMessageConverter()
         );
+    }
+
+    private MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
+        MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
+        mappingJackson2HttpMessageConverter.setSupportedMediaTypes(
+                List.of(
+                        MediaType.APPLICATION_JSON,
+                        MediaType.APPLICATION_FORM_URLENCODED
+                )
+        );
+        return mappingJackson2HttpMessageConverter;
     }
 }

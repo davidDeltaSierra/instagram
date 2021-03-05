@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("profile")
 @RequiredArgsConstructor
-public class ProfileController {
+public class ProfileController extends AbstractController {
     private final ProfileService profileService;
 
     @GetMapping("{username}")
     public ResponseEntity<?> profileView(@PathVariable String username) {
-        return new ResponseEntity<>(profileService.profile(username), HttpStatus.OK);
+        return new ResponseEntity<>(profileService.profile(username, getSessionRedis()), HttpStatus.OK);
     }
 }

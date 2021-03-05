@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("hashtag")
 @RequiredArgsConstructor
-public class HashtagController {
+public class HashtagController extends AbstractController {
     private final HashtagService hashTagService;
 
     @GetMapping
     public ResponseEntity<?> getPostsByHashtag(@RequestParam String tagName,
                                                @RequestParam(required = false) String after) {
-        return new ResponseEntity<>(hashTagService.getPostsByHashtag(tagName, after), HttpStatus.OK);
+        return new ResponseEntity<>(hashTagService.getPostsByHashtag(tagName, after, getSessionRedis()), HttpStatus.OK);
     }
 }
