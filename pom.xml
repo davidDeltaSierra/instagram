@@ -20,9 +20,9 @@
         <maven.compiler.release>11</maven.compiler.release>
         <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
         <org.projectlombok.version>1.18.18</org.projectlombok.version>
-        <maven-compiler-plugin.version>0.2.0</maven-compiler-plugin.version>
+        <org-lombok-mapstruct-binding.version>0.2.0</org-lombok-mapstruct-binding.version>
         <org.apache.maven.plugins.version>3.8.1</org.apache.maven.plugins.version>
-        <springdoc-openapi.version>1.5.3</springdoc-openapi.version>
+        <springdoc-openapi.version>1.5.5</springdoc-openapi.version>
         <jsoup.version>1.13.1</jsoup.version>
         <jedis.version>3.5.1</jedis.version>
         <commons-text.version>1.9</commons-text.version>
@@ -149,7 +149,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>${maven-compiler-plugin.version}</version>
+                            <version>${org-lombok-mapstruct-binding.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

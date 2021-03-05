@@ -1,6 +1,9 @@
 package br.com.instagram.controller;
 
 import br.com.instagram.integration.dto.Media;
+import br.com.instagram.integration.dto.NextPost;
+import br.com.instagram.integration.dto.Post;
+import br.com.instagram.integration.dto.Upload;
 import br.com.instagram.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 @Slf4j
 @RestController
 @RequestMapping("post")
@@ -17,29 +22,29 @@ import javax.validation.Valid;
 public class PostController extends AbstractController {
     private final PostService postService;
 
-    @GetMapping
-    public ResponseEntity<?> getPosts(@RequestParam String id,
-                                      @RequestParam String after) {
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<NextPost> getPosts(@RequestParam String id,
+                                             @RequestParam String after) {
         return new ResponseEntity<>(postService.getPosts(id, after, getSessionRedis()), HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<?> upload(@RequestBody byte[] file,
-                                    @RequestHeader("Content-Type") String contentType,
-                                    @RequestHeader("Content-Length") String contentLength) {
+    @PostMapping(produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<Upload> upload(@RequestBody byte[] file,
+                                         @RequestHeader("Content-Type") String contentType,
+                                         @RequestHeader("Content-Length") String contentLength) {
         return new ResponseEntity<>(postService.upload(file, getSessionRedis(), contentType, contentLength), HttpStatus.CREATED);
     }
 
-    @PostMapping("{uploadId}")
-    public ResponseEntity<?> upload(@PathVariable String uploadId,
-                                    @RequestBody @Valid Media media) {
+    @PostMapping(value = "{uploadId}", produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> upload(@PathVariable String uploadId,
+                                       @RequestBody @Valid Media media) {
         postService.upload(getSessionRedis(), media.withUploadId(uploadId));
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping("{shortcode}")
-    public ResponseEntity<?> getPost(@PathVariable String shortcode,
-                                     @RequestHeader("User-Agent") String userAgent) {
+    @GetMapping(value = "{shortcode}", produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<Post> getPost(@PathVariable String shortcode,
+                                        @RequestHeader("User-Agent") String userAgent) {
         return new ResponseEntity<>(postService.getPost(shortcode, getSessionRedis(), userAgent), HttpStatus.OK);
     }
 }
