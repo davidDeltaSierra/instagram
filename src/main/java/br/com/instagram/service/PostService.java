@@ -43,8 +43,8 @@ public class PostService {
         return postIntegration.getPost(sessionRedis.getCookies(), shortcode, executorFactory(shortcode), userAgent);
     }
 
-    public Upload upload(byte[] file, SessionRedis sessionRedis, String contentType, String contentLength) {
-        return postIntegration.upload(file, sessionRedis.getCookies(), contentType, contentLength);
+    public Upload upload(byte[] file, SessionRedis sessionRedis, String contentLength) {
+        return postIntegration.upload(file, sessionRedis.getCookies(), contentLength);
     }
 
     public void upload(SessionRedis sessionRedis, Media media) {

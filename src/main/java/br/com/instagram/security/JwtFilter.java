@@ -39,7 +39,7 @@ public class JwtFilter extends BasicAuthenticationFilter {
                     null
             );
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            log.info("CURRENT CLIENT: {}", authenticationToken.getPrincipal());
+            log.info("Current client: {}", authenticationToken.getPrincipal());
             chain.doFilter(request, response);
         } catch (Exception exception) {
             handlerExceptionResolver.resolveException(request, response, null, exception);

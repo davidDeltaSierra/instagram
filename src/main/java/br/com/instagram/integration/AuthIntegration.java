@@ -31,20 +31,27 @@ public class AuthIntegration {
             String sharedData = RegexUtil.getSharedData(document.data())
                     .orElseThrow(() -> new RuntimeException("Shared data not found in page"));
             LoginPage loginPage = objectMapper.readValue(sharedData, LoginPage.class);
-            Connection.Response response = Jsoup.connect("https://www.instagram.com/accounts/login/ajax/")
+            Connection.Response loginResponse = Jsoup.connect("https://www.instagram.com/accounts/login/ajax/")
                     .ignoreContentType(true)
                     .method(Connection.Method.POST)
-                    .header("User-Agent", userAgent)
+                    .header("User-Agent", UserAgent.CHROME.getRaw())
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .header("x-csrftoken", loginPage.getConfig().getCsrfToken())
                     .data("username", loginDto.getUsername())
                     .data("enc_password", "#PWD_INSTAGRAM_BROWSER:0:" + System.currentTimeMillis() + ":" + loginDto.getPassword())
                     .execute();
-            Map<String, String> cookies = response.cookies();
-            if (!cookies.containsKey("sessionid")) {
+            Map<String, String> loginCookies = loginResponse.cookies();
+            if (!loginCookies.containsKey("sessionid")) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
             }
-            return cookies;
+
+            Connection.Response homeResponse = Jsoup.connect("https://www.instagram.com/")
+                    .header("User-Agent", UserAgent.CHROME.getRaw())
+                    .cookies(loginCookies)
+                    .execute();
+            Map<String, String> extraCookies = homeResponse.cookies();
+            loginCookies.putAll(extraCookies);
+            return loginCookies;
         } catch (HttpStatusException ex) {
             HttpStatus resolve = ofNullable(HttpStatus.resolve(ex.getStatusCode()))
                     .orElse(HttpStatus.INTERNAL_SERVER_ERROR);

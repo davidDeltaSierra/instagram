@@ -32,7 +32,7 @@ public class PostController extends AbstractController {
     public ResponseEntity<Upload> upload(@RequestBody byte[] file,
                                          @RequestHeader("Content-Type") String contentType,
                                          @RequestHeader("Content-Length") String contentLength) {
-        return new ResponseEntity<>(postService.upload(file, getSessionRedis(), contentType, contentLength), HttpStatus.CREATED);
+        return new ResponseEntity<>(postService.upload(file, getSessionRedis(), contentLength), HttpStatus.CREATED);
     }
 
     @PostMapping(value = "{uploadId}", produces = APPLICATION_JSON_VALUE)

@@ -1,6 +1,7 @@
 package br.com.instagram.integration.dto;
 
 import br.com.instagram.integration.pagination.NextPageHandler;
+import br.com.instagram.integration.pagination.PageInfo;
 import br.com.instagram.integration.pagination.Pagination;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -52,6 +53,12 @@ public class Post implements NextPageHandler {
 
     @JsonAlias("edge_media_to_parent_comment")
     Pagination<Node<Comment>> parentComment;
+
+    @Override
+    public String next(PageInfo pageInfo) {
+        String url = baseUrl(pageInfo, "post");
+        return url.concat("id=" + owner.getId());
+    }
 
     @JsonPOJOBuilder(withPrefix = "")
     public static class Builder {

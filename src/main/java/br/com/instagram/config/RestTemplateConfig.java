@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -24,7 +25,9 @@ public class RestTemplateConfig implements WebMvcConfigurer {
 
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate(getMessageConverters());
+        RestTemplate restTemplate = new RestTemplate(getMessageConverters());
+        restTemplate.setInterceptors(getClientHttpRequestInterceptor());
+        return restTemplate;
     }
 
     private List<HttpMessageConverter<?>> getMessageConverters() {
@@ -44,5 +47,15 @@ public class RestTemplateConfig implements WebMvcConfigurer {
                 )
         );
         return mappingJackson2HttpMessageConverter;
+    }
+
+    private List<ClientHttpRequestInterceptor> getClientHttpRequestInterceptor() {
+        return List.of(
+                (a, b, c) -> {
+                    log.info("URI: {}", a.getURI());
+                    log.info("Headers: {}", a.getHeaders());
+                    return c.execute(a, b);
+                }
+        );
     }
 }

@@ -11,19 +11,23 @@ import static java.util.Objects.isNull;
 
 public interface NextPageHandler {
 
+    default String baseUrl(PageInfo pageInfo, String entryPoint) {
+        return ConfigProperties.getApiBasePath() + "/" + entryPoint + "?after=" + pageInfo.getEndCursor() + "&";
+    }
+
     default String next(PageInfo pageInfo) {
         QueryExecutor<?> queryExecutorFromRequest = QueryComponent.getQueryExecutorFromRequest();
         if (isNotPageable(pageInfo, queryExecutorFromRequest)) {
             return null;
         }
-        String url = ConfigProperties.getApiBasePath() + "/" + queryExecutorFromRequest.getEntryPoint() + "?after=" + pageInfo.getEndCursor() + "&";
+        String baseUrl = baseUrl(pageInfo, queryExecutorFromRequest.getEntryPoint());
         String query = queryExecutorFromRequest
                 .getQueryVariables()
                 .entrySet()
                 .stream()
                 .map(Objects::toString)
                 .collect(Collectors.joining("&"));
-        return url.concat(query);
+        return baseUrl.concat(query);
     }
 
     private boolean isNotPageable(PageInfo pageInfo, QueryExecutor<?> queryExecutorFromRequest) {
